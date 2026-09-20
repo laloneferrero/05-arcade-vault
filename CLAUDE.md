@@ -2,6 +2,9 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Skills
+Usa siempre /frontend-design para diseñar la UI
+
 ## Project
 
 Arcade Vault: online games platform, compete for highest score. README (Spanish) says project uses Spec Driven Design (`/spec`, `/spec-impl`) following https://github.com/Klerith/fernando-skills (installed via `npx skills@latest add Klerith/fernando-skills`).
