@@ -105,7 +105,7 @@ export const GAMES: Game[] = [
 
 export const CATS = ["TODOS", "ARCADE", "PUZZLE", "SHOOTER", "VERSUS"] as const;
 
-const PLAYERS = [
+export const PLAYERS = [
   "PX_KAI", "NEONFOX", "Z3R0COOL", "M00NRYU", "VAULT_07", "GLITCHA",
   "ATARI_KID", "CYBER_LU", "MAGENTA88", "SCANLINE", "BIT_LORD", "ARKADYA",
   "DROID_X", "RGB_QUEEN", "PIXEL_DAD", "RETROVIRA", "VECTORX", "JOY_STK",
@@ -140,4 +140,58 @@ export function seededScores(seed: number, count = 12): ScoreRow[] {
     rows.push({ rank: i + 1, name, score: Math.max(score, 1000), date: `${day}/${mon}/2026` });
   }
   return rows.sort((a, b) => b.score - a.score).map((r, i) => ({ ...r, rank: i + 1 }));
+}
+
+export type RecentScore = {
+  player: string;
+  game: string;
+  score: number;
+  ago: string;
+  color: GameColor;
+};
+
+export type TopPlayer = { rank: number; name: string; score: number };
+
+/** Deterministic mock "live activity" ticker for the landing page. Rows keep insertion order (most recent first) so `ago` stays meaningful. */
+export function recentScores(count = 7): RecentScore[] {
+  let s = 1337;
+  const rand = () => (s = (s * 9301 + 49297) % 233280) / 233280;
+  const usedPlayers = new Set<string>();
+  const rows: RecentScore[] = [];
+  for (let i = 0; i < count; i++) {
+    let player: string;
+    do {
+      player = PLAYERS[Math.floor(rand() * PLAYERS.length)];
+    } while (usedPlayers.has(player) && usedPlayers.size < PLAYERS.length);
+    usedPlayers.add(player);
+    const game = GAMES[Math.floor(rand() * GAMES.length)];
+    const score = Math.floor(5000 + rand() * 200000);
+    rows.push({
+      player,
+      game: game.title,
+      score,
+      ago: `hace ${2 + i * 5} min`,
+      color: game.color,
+    });
+  }
+  return rows;
+}
+
+/** Deterministic mock top-players-of-the-day for the landing page. Scores decrease monotonically so `.tp-fill` bars shrink downward. */
+export function topPlayersToday(count = 5): TopPlayer[] {
+  let s = 4242;
+  const rand = () => (s = (s * 9301 + 49297) % 233280) / 233280;
+  const used = new Set<string>();
+  const rows: TopPlayer[] = [];
+  let score = 320000;
+  for (let i = 0; i < count; i++) {
+    let name: string;
+    do {
+      name = PLAYERS[Math.floor(rand() * PLAYERS.length)];
+    } while (used.has(name) && used.size < PLAYERS.length);
+    used.add(name);
+    if (i > 0) score -= Math.floor(10000 + rand() * 40000);
+    rows.push({ rank: i + 1, name, score: Math.max(score, 1000) });
+  }
+  return rows;
 }
